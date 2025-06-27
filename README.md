@@ -1,63 +1,131 @@
-## Reddit search engine web application
+# Reddit Search Engine Web Application
 
-### There are three stages in this application. Crawling, Indexing and Retrieving
+## Table of Contents
 
-#### Stage 1 - Crawling: 
-1. The first stage involves crawling the data from the subreddits using PRAW which is a python reddit API wrapper.
-2. I have created a shell script crawler.sh which in turn calls the reddit_crawler.py. You can pass the subreddits which you want to call as arguments while executing the shell script. The script supports multithreading, which enhances the efficiency of data fetching by processing multiple threads in parallel.
-3. The script fetches top posts from the specified subreddits using the Reddit API. We can also specify the number of posts to fetch per subreddit, and the depth of comment threads to explore.
+- [Introduction](#introduction)
+- [Motivation](#motivation)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Directory Structure](#directory-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Technologies Used](#technologies-used)
+- [Screenshots](#screenshots)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-#### Stage 2 - Indexing:
-1. For indexing PyLucene was used, which is a Python extension for the Apache Lucene search engine library written in Java. 
-2. PyLucene allows to create custom analyzers to handle specific text processing such as stemming, tokenization etc.
-3. create_index.py reads the reddit text files present in the reddit_data/ folder and is used for index creation based on the selected fields.
+## Introduction
 
-#### Stage 3 - Retrieving:
+This is a full-stack Reddit Search Engine web application designed to efficiently crawl, index, and retrieve Reddit posts based on user queries. Users can search, filter, and sort Reddit posts by relevance or upvotes through a user-friendly interface.
 
-1. PyLucene helps in quickly retrieving information from large datasets based on text queries. It also gives a match score which indicates how well the document matches with the user input query.
+## Motivation
 
-2. The search functionality is built upon Apache Lucene's robust search mechanisms, enhanced by customized sorting capabilities.
+With the abundance of valuable information on Reddit, a powerful and customizable search engine can help users quickly access relevant discussions, posts, and comments. This project provides more tailored search and ranking than Reddit's native search.
 
-3. The Upvotes option sorts Reddit posts based on the number of upvotes the post has. The Relevance option uses a custom ranking function which I have created to sort posts by how closely they match the search keywords. The Popularity option sorts posts by the number of comments they have, highlighting the most discussed content.
+## Features
 
+- **Automated Data Crawling:** Fetches posts and comments from specified subreddits using the Reddit API.
+- **Efficient Indexing:** Leverages PyLucene for fast text search and custom ranking algorithms.
+- **Flexible Searching:** Search posts by keywords, relevance, or upvotes.
+- **User-Friendly UI:** Clean web interface built with Flask, Jinja2, HTML, and CSS.
+- **Custom Ranking:** Option to sort by upvotes or a custom relevance metric.
+- **Batch Data Management:** Supports batch crawling and indexing for large-scale data.
+- **Screenshots:** Example screens are included below.
 
+## Architecture
 
-### Overview of the directories/files
+There are three stages in this application: **Crawling**, **Indexing**, and **Retrieving**.
 
-1. main.py: The main entry point for the Flask application, setting up the server and initializing all routes and configurations necessary for the web application.
+### Stage 1 - Crawling
 
-2. reddit_data/: The folder to store all the crawled reddit data text files, which serve as the data source for Lucene indexing. Each text file includes raw Reddit post data, such as title, body, link to the reddit post, upvotes, and comments.
+1. Crawls subreddit data using PRAW (Python Reddit API Wrapper).
+2. `crawler.sh` invokes `reddit_crawler.py`. Pass subreddits as arguments.
+3. Fetches top posts and comments based on configurable parameters.
 
-3. lucene_code/: Contains the files related to lucene indexing.
+### Stage 2 - Indexing
 
-4. lucene_code/create_index.py: Creates and configures the Lucene index, defining fields such as username, timestamp, and content, allowing for efficient search operations. By organizing data in a structured manner, it allows for efficient and rapid search operations.
+1. Uses PyLucene (Python extension for Apache Lucene) for indexing.
+2. Supports custom analyzers for advanced text processing.
+3. `create_index.py` processes Reddit data files for index creation.
 
-5. lucene_code/lucene_index/: Directory where Lucene's index files are stored, facilitating quick data retrieval during search operations.
+### Stage 3 - Retrieving
 
-6. website/retrieve_data.py: Acts as the data access layer, using Apache Lucene to fetch and process data for indexing and query responses. It ensures efficient retrieval of relevant Reddit posts based on user queries.
+1. PyLucene enables high-performance text search and ranking.
+2. Supports sorting by upvotes or custom relevance function.
+3. Returns top matching posts with scoring.
 
-7. website/views.py: Orchestrates data flow between the web interface and the backend logic, ensuring data is correctly passed to templates for rendering. It manages the routes and controls the display of search results to the user.
+## Directory Structure
 
-8. website/static/: Contains CSS files for web interface styling, ensuring a consistent and responsive design.
+- `main.py`: Entry point for the Flask application.
+- `reddit_data/`: Stores crawled Reddit data text files.
+- `lucene_code/`: Contains Lucene indexing scripts.
+  - `create_index.py`: Script for index creation and configuration.
+  - `lucene_index/`: Directory for Lucene index files.
+- `website/`:
+  - `retrieve_data.py`: Data access layer for fetching/indexing Reddit data.
+  - `views.py`: Handles routes, logic, and data flow to the frontend.
+  - `static/`: CSS files for UI styling.
+  - `templates/`: HTML templates using Jinja2.
 
-9. website/templates/: Houses HTML files (home.html, search.html) that define the structure and layout of the web pages. Using Jinja2 for dynamic content rendering, it integrates data into the HTML to display search results and other information.
+## Installation
 
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/varunmedi/reddit-search-engine.git
+   cd reddit-search-engine
+   ```
 
+2. **Install dependencies:**
+   - Python 3.8+
+   - [PRAW](https://praw.readthedocs.io/)
+   - [Flask](https://flask.palletsprojects.com/)
+   - [PyLucene](https://lucene.apache.org/pylucene/)
+   - Other dependencies from `requirements.txt` (if present)
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Usage:
-1. Crawling the data from reddit - 
-./crawler.sh --subreddits subreddit1 subreddit2 --limit 100 --depth 5
-2. Creating the index - 
-python3 create_index.py
-3. To get the flask app running - 
-python3 main.py
+3. **Configure Reddit API credentials:**
+   - Create a `praw.ini` file or set environment variables with your Reddit API client ID, secret, and user agent.
 
+## Usage
 
+1. **Crawl Reddit data:**
+   ```bash
+   ./crawler.sh --subreddits subreddit1 subreddit2 --limit 100 --depth 5
+   ```
+2. **Create the index:**
+   ```bash
+   python3 lucene_code/create_index.py
+   ```
+3. **Run the Flask web app:**
+   ```bash
+   python3 main.py
+   ```
+4. Access the web app at `http://localhost:5000`
 
-### Screenshots showing the system in action.
+## Technologies Used
 
-1. The homepage of our Flask web application, a Reddit search engine, contains a search bar where users can enter queries to find Reddit posts. Adjacent to the search bar, a drop-down menu is given which allows users to sort results by upvotes, relevance, or popularity. 
-![plot](./images/Picture1.png)
+- **Backend:** Python, Flask, PyLucene, PRAW
+- **Frontend:** HTML, CSS, Jinja2
+- **Search Engine:** Apache Lucene (via PyLucene)
+- **Shell Scripting:** Bash (`crawler.sh`)
 
-2. The results page of our Reddit search engine displays the top 20 matching Reddit posts based on the user's query. Each post is presented with its title, which is a clickable link redirecting users to the original Reddit post. Alongside the title, the body of the post is shown to provide context. Additionally, each post includes a match score, derived from Lucene, to indicate its relevance to the query, and the number of upvotes to highlight its popularity. This will ensure the users can quickly assess and navigate to the most relevant and popular posts related to their search.
-![plot](./images/Picture2.png)
+## Screenshots
+
+1. **Homepage:**  
+   ![Homepage](./images/Picture1.png)
+2. **Search Results:**  
+   ![Results](./images/Picture2.png)
+
+## Contributing
+
+Contributions are welcome! Please open issues or submit pull requests for improvements. For major changes, please open an issue first to discuss your ideas.
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+## Contact
+
+Created by [Varun Medi](https://github.com/varunmedi).  
+For questions, open an issue or contact me via GitHub.
